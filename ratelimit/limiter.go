@@ -35,7 +35,7 @@ func (l *Limiter) CheckPreRequest(ctx context.Context, identity RequestIdentity,
 	}
 
 	minuteKey := time.Now().Unix() / 60
-	prefix := l.keyPrefix(identity)
+	prefix := l.KeyPrefix(identity)
 
 	rpmKey := fmt.Sprintf("rl:rpm:%s:%d", prefix, minuteKey)
 	tpmKey := fmt.Sprintf("rl:tpm:%s:%d", prefix, minuteKey)
@@ -139,7 +139,7 @@ func (l *Limiter) TrackPostResponse(ctx context.Context, identity RequestIdentit
 		return
 	}
 
-	prefix := l.keyPrefix(identity)
+	prefix := l.KeyPrefix(identity)
 
 	// Release concurrency slot only if it was actually acquired
 	if releaseConcurrency {
@@ -161,12 +161,13 @@ func (l *Limiter) ReleaseConcurrency(ctx context.Context, identity RequestIdenti
 	if l.rdb == nil {
 		return
 	}
-	prefix := l.keyPrefix(identity)
+	prefix := l.KeyPrefix(identity)
 	concKey := fmt.Sprintf("rl:conc:%s", prefix)
 	l.rdb.Eval(ctx, luaConcurrencyRelease, []string{concKey})
 }
 
-func (l *Limiter) keyPrefix(identity RequestIdentity) string {
+// KeyPrefix returns the Redis key prefix for the given identity.
+func (l *Limiter) KeyPrefix(identity RequestIdentity) string {
 	if identity.APIKeyID > 0 {
 		return "apikey:" + strconv.FormatInt(identity.APIKeyID, 10)
 	}
