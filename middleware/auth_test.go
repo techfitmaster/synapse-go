@@ -16,6 +16,46 @@ func init() {
 	gin.SetMode(gin.TestMode)
 }
 
+// ── GenerateToken Tests ─────────────────────────────────────────
+
+func TestGenerateToken_Valid(t *testing.T) {
+	secret := "test-secret"
+	claims := jwt.MapClaims{"user_id": float64(42), "role": "admin"}
+
+	token, err := GenerateToken(claims, secret, 2*time.Hour)
+	if err != nil {
+		t.Fatalf("GenerateToken() error: %v", err)
+	}
+	if token == "" {
+		t.Error("GenerateToken() returned empty token")
+	}
+
+	// Verify the token is parseable
+	parsed, err := ParseJWT(token, secret)
+	if err != nil {
+		t.Fatalf("ParseJWT(generated token) error: %v", err)
+	}
+	uid, _ := parsed["user_id"].(float64)
+	if uid != 42 {
+		t.Errorf("user_id = %v, want 42", parsed["user_id"])
+	}
+}
+
+func TestGenerateToken_ContainsExpAndIat(t *testing.T) {
+	secret := "test-secret"
+	claims := jwt.MapClaims{"user_id": float64(1)}
+
+	token, _ := GenerateToken(claims, secret, 1*time.Hour)
+	parsed, _ := ParseJWT(token, secret)
+
+	if _, ok := parsed["exp"]; !ok {
+		t.Error("token missing exp claim")
+	}
+	if _, ok := parsed["iat"]; !ok {
+		t.Error("token missing iat claim")
+	}
+}
+
 // TC-HAPPY-AUTH-001: ExtractBearerToken with valid Bearer header
 func TestExtractBearerToken_Valid(t *testing.T) {
 	w := httptest.NewRecorder()

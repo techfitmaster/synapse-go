@@ -11,6 +11,14 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
+// GenerateToken signs a JWT with the given claims, secret, and expiry duration.
+func GenerateToken(claims jwt.MapClaims, secret string, expiry time.Duration) (string, error) {
+	claims["exp"] = time.Now().Add(expiry).Unix()
+	claims["iat"] = time.Now().Unix()
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
+
 // ExtractBearerToken extracts the token from an "Authorization: Bearer <token>" header.
 func ExtractBearerToken(c *gin.Context) (string, bool) {
 	parts := strings.SplitN(c.GetHeader("Authorization"), " ", 2)
