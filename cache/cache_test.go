@@ -54,8 +54,12 @@ func TestRedisCache_Del(t *testing.T) {
 	c := NewRedis(rdb, "test")
 	ctx := context.Background()
 
-	c.Set(ctx, "key1", "value1", 10*time.Second)
-	c.Del(ctx, "key1")
+	if err := c.Set(ctx, "key1", "value1", 10*time.Second); err != nil {
+		t.Fatalf("Set() error: %v", err)
+	}
+	if err := c.Del(ctx, "key1"); err != nil {
+		t.Fatalf("Del() error: %v", err)
+	}
 
 	_, err := c.Get(ctx, "key1")
 	if err == nil {
@@ -69,8 +73,12 @@ func TestRedisCache_PrefixIsolation(t *testing.T) {
 	c2 := NewRedis(rdb, "app2")
 	ctx := context.Background()
 
-	c1.Set(ctx, "key", "from-app1", 10*time.Second)
-	c2.Set(ctx, "key", "from-app2", 10*time.Second)
+	if err := c1.Set(ctx, "key", "from-app1", 10*time.Second); err != nil {
+		t.Fatalf("c1.Set() error: %v", err)
+	}
+	if err := c2.Set(ctx, "key", "from-app2", 10*time.Second); err != nil {
+		t.Fatalf("c2.Set() error: %v", err)
+	}
 
 	v1, _ := c1.Get(ctx, "key")
 	v2, _ := c2.Get(ctx, "key")
@@ -88,7 +96,9 @@ func TestGetOrLoad_CacheHit(t *testing.T) {
 	c := NewRedis(rdb, "test")
 	ctx := context.Background()
 
-	c.Set(ctx, "cached", "existing", 10*time.Second)
+	if err := c.Set(ctx, "cached", "existing", 10*time.Second); err != nil {
+		t.Fatalf("Set() error: %v", err)
+	}
 
 	loaded := false
 	val, err := GetOrLoad(ctx, c, "cached", 10*time.Second, func() (string, error) {

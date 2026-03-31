@@ -86,7 +86,7 @@ func (p *aliyunSMSProvider) SendSMS(ctx context.Context, phone, content string) 
 	if err != nil {
 		return fmt.Errorf("sms send: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, _ := io.ReadAll(resp.Body)
 

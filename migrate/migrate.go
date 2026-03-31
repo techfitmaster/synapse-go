@@ -24,7 +24,15 @@ func Run(dsn, migrationsPath string, forceVersion int, log *zap.Logger) error {
 	if err != nil {
 		return fmt.Errorf("init migrate: %w", err)
 	}
-	defer m.Close()
+	defer func() {
+		srcErr, dbErr := m.Close()
+		if srcErr != nil {
+			log.Warn("migrate: close source", zap.Error(srcErr))
+		}
+		if dbErr != nil {
+			log.Warn("migrate: close db", zap.Error(dbErr))
+		}
+	}()
 
 	if forceVersion > 0 {
 		log.Info("forcing migration version", zap.Int("version", forceVersion))

@@ -30,7 +30,9 @@ func TestHandler_AllHealthy(t *testing.T) {
 	}
 
 	var s Status
-	json.Unmarshal(w.Body.Bytes(), &s)
+	if err := json.Unmarshal(w.Body.Bytes(), &s); err != nil {
+		t.Fatalf("json.Unmarshal() error: %v", err)
+	}
 	if s.Status != "ok" {
 		t.Errorf("status = %q, want ok", s.Status)
 	}
@@ -56,7 +58,9 @@ func TestHandler_Degraded(t *testing.T) {
 	}
 
 	var s Status
-	json.Unmarshal(w.Body.Bytes(), &s)
+	if err := json.Unmarshal(w.Body.Bytes(), &s); err != nil {
+		t.Fatalf("json.Unmarshal() error: %v", err)
+	}
 	if s.Status != "degraded" {
 		t.Errorf("status = %q, want degraded", s.Status)
 	}

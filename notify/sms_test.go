@@ -16,7 +16,7 @@ func TestNewSMS_Send(t *testing.T) {
 			t.Errorf("method = %s, want POST", r.Method)
 		}
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"Code": "OK", "Message": "OK"})
+		_ = json.NewEncoder(w).Encode(map[string]string{"Code": "OK", "Message": "OK"})
 	}))
 	defer srv.Close()
 
@@ -39,7 +39,7 @@ func TestNewSMS_Send(t *testing.T) {
 func TestNewSMS_AliyunError(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
+		_ = json.NewEncoder(w).Encode(map[string]string{
 			"Code":    "isv.BUSINESS_LIMIT_CONTROL",
 			"Message": "触发业务限流",
 		})

@@ -22,13 +22,17 @@ func createTestImage(w, h int) image.Image {
 
 func encodeJPEG(img image.Image) []byte {
 	var buf bytes.Buffer
-	jpeg.Encode(&buf, img, &jpeg.Options{Quality: 90})
+	if err := jpeg.Encode(&buf, img, &jpeg.Options{Quality: 90}); err != nil {
+		panic("jpeg.Encode: " + err.Error())
+	}
 	return buf.Bytes()
 }
 
 func encodePNG(img image.Image) []byte {
 	var buf bytes.Buffer
-	png.Encode(&buf, img)
+	if err := png.Encode(&buf, img); err != nil {
+		panic("png.Encode: " + err.Error())
+	}
 	return buf.Bytes()
 }
 

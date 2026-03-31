@@ -34,7 +34,7 @@ func cleanupRateLimitKeys(t *testing.T, rdb *redis.Client, userID int64) {
 func TestCheckPreRequest_Redis_Allowed(t *testing.T) {
 	if testing.Short() { t.Skip("requires external service") }
 	rdb := newTestRedis(t)
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	defer cleanupRateLimitKeys(t, rdb, 8181)
 
 	limiter := NewLimiter(rdb)
@@ -64,7 +64,7 @@ func TestCheckPreRequest_Redis_Allowed(t *testing.T) {
 func TestCheckPreRequest_Redis_RPMExceeded(t *testing.T) {
 	if testing.Short() { t.Skip("requires external service") }
 	rdb := newTestRedis(t)
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	defer cleanupRateLimitKeys(t, rdb, 8182)
 
 	limiter := NewLimiter(rdb)
@@ -98,7 +98,7 @@ func TestCheckPreRequest_Redis_RPMExceeded(t *testing.T) {
 func TestCheckPreRequest_Redis_TPMExceeded(t *testing.T) {
 	if testing.Short() { t.Skip("requires external service") }
 	rdb := newTestRedis(t)
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	defer cleanupRateLimitKeys(t, rdb, 8183)
 
 	limiter := NewLimiter(rdb)
@@ -126,7 +126,7 @@ func TestCheckPreRequest_Redis_TPMExceeded(t *testing.T) {
 func TestCheckPreRequest_Redis_ConcurrencyExceeded(t *testing.T) {
 	if testing.Short() { t.Skip("requires external service") }
 	rdb := newTestRedis(t)
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	defer cleanupRateLimitKeys(t, rdb, 8184)
 
 	limiter := NewLimiter(rdb)
@@ -155,7 +155,7 @@ func TestCheckPreRequest_Redis_ConcurrencyExceeded(t *testing.T) {
 func TestTrackPostResponse_Redis_AdjustsTPM(t *testing.T) {
 	if testing.Short() { t.Skip("requires external service") }
 	rdb := newTestRedis(t)
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	defer cleanupRateLimitKeys(t, rdb, 8185)
 
 	limiter := NewLimiter(rdb)
@@ -186,7 +186,7 @@ func TestTrackPostResponse_Redis_AdjustsTPM(t *testing.T) {
 func TestReleaseConcurrency_Redis(t *testing.T) {
 	if testing.Short() { t.Skip("requires external service") }
 	rdb := newTestRedis(t)
-	defer rdb.Close()
+	defer func() { _ = rdb.Close() }()
 	defer cleanupRateLimitKeys(t, rdb, 8186)
 
 	limiter := NewLimiter(rdb)

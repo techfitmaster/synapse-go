@@ -34,7 +34,9 @@ func TestLocalStorage_Delete(t *testing.T) {
 	dir := t.TempDir()
 	s := NewLocal(dir, "http://localhost:8080/files")
 
-	s.Upload(context.Background(), "to-delete.txt", strings.NewReader("data"), "text/plain")
+	if _, err := s.Upload(context.Background(), "to-delete.txt", strings.NewReader("data"), "text/plain"); err != nil {
+		t.Fatalf("Upload() error: %v", err)
+	}
 
 	err := s.Delete(context.Background(), "to-delete.txt")
 	if err != nil {

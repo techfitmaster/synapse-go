@@ -31,7 +31,7 @@ func RegisterCallbacks(db *gorm.DB, column string) {
 		})
 	}
 
-	db.Callback().Create().Before("gorm:create").Register(fmt.Sprintf("tenant:create:%s", column), func(db *gorm.DB) {
+	_ = db.Callback().Create().Before("gorm:create").Register(fmt.Sprintf("tenant:create:%s", column), func(db *gorm.DB) {
 		if db.Statement.Context == nil {
 			return
 		}
@@ -41,7 +41,7 @@ func RegisterCallbacks(db *gorm.DB, column string) {
 		}
 		db.Statement.SetColumn(column, tenantID)
 	})
-	db.Callback().Query().Before("gorm:query").Register(fmt.Sprintf("tenant:query:%s", column), callback)
-	db.Callback().Update().Before("gorm:update").Register(fmt.Sprintf("tenant:update:%s", column), callback)
-	db.Callback().Delete().Before("gorm:delete").Register(fmt.Sprintf("tenant:delete:%s", column), callback)
+	_ = db.Callback().Query().Before("gorm:query").Register(fmt.Sprintf("tenant:query:%s", column), callback)
+	_ = db.Callback().Update().Before("gorm:update").Register(fmt.Sprintf("tenant:update:%s", column), callback)
+	_ = db.Callback().Delete().Before("gorm:delete").Register(fmt.Sprintf("tenant:delete:%s", column), callback)
 }
