@@ -15,6 +15,7 @@ const testDSN = "root:root@tcp(localhost:3306)/test_818_shared?parseTime=true&ch
 
 // TC-HAPPY-MIGRATE-INT-001: Run with empty migrations directory succeeds (no change)
 func TestRun_NoMigrations(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	// Create temp dir with no migration files — Run should return an error
 	dir := t.TempDir()
 	log, _ := zap.NewDevelopment()
@@ -27,6 +28,7 @@ func TestRun_NoMigrations(t *testing.T) {
 
 // TC-HAPPY-MIGRATE-INT-002: Run with a real migration
 func TestRun_WithMigration(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	dir := t.TempDir()
 	log, _ := zap.NewDevelopment()
 
@@ -64,6 +66,7 @@ func TestRun_WithMigration(t *testing.T) {
 
 // TC-EXCEPTION-MIGRATE-INT-001: Run with invalid DSN
 func TestRun_InvalidDSN(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	log, _ := zap.NewDevelopment()
 	err := Run("invalid:invalid@tcp(localhost:9999)/nope", "file:///tmp", 0, log)
 	if err == nil {
@@ -73,6 +76,7 @@ func TestRun_InvalidDSN(t *testing.T) {
 
 // TC-EXCEPTION-MIGRATE-INT-002: Run with empty DSN
 func TestRun_EmptyDSN(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	log, _ := zap.NewDevelopment()
 	err := Run("", "file:///tmp", 0, log)
 	if err == nil {

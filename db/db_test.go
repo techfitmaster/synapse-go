@@ -10,6 +10,7 @@ const testDSN = "root:root@tcp(localhost:3306)/test_818_shared?parseTime=true&ch
 
 // TC-HAPPY-DB-001: connect to MySQL with valid DSN
 func TestNew_Success(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	db, err := New(config.MySQLConfig{DSN: testDSN})
 	if err != nil {
 		t.Fatalf("failed to connect: %v", err)
@@ -26,6 +27,7 @@ func TestNew_Success(t *testing.T) {
 
 // TC-HAPPY-DB-002: connection pool settings applied
 func TestNew_PoolSettings(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	db, err := New(config.MySQLConfig{DSN: testDSN})
 	if err != nil {
 		t.Fatalf("failed to connect: %v", err)
@@ -40,6 +42,7 @@ func TestNew_PoolSettings(t *testing.T) {
 
 // TC-EXCEPTION-DB-001: invalid DSN returns error
 func TestNew_InvalidDSN(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	_, err := New(config.MySQLConfig{DSN: "invalid:invalid@tcp(localhost:9999)/nope"})
 	if err == nil {
 		t.Error("expected error for invalid DSN")
@@ -48,6 +51,7 @@ func TestNew_InvalidDSN(t *testing.T) {
 
 // TC-EXCEPTION-DB-002: empty DSN returns error
 func TestNew_EmptyDSN(t *testing.T) {
+	if testing.Short() { t.Skip("requires external service") }
 	_, err := New(config.MySQLConfig{DSN: ""})
 	if err == nil {
 		t.Error("expected error for empty DSN")
