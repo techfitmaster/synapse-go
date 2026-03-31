@@ -30,8 +30,9 @@ go get github.com/techfitmaster/synapse-go@latest
 | 包 | 说明 |
 |---|------|
 | `resp` | 统一 API 响应格式（Success/Error/SuccessPage + 错误码） |
-| `ginutil` | Gin 路由参数解析（ParseIDParam/ParseParam） |
-| `middleware` | HTTP 中间件（CORS、RequestID、JWT 鉴权） |
+| `bizerr` | 业务错误类型（BizError + HandleError + 便捷构造函数） |
+| `ginutil` | Gin 工具（路由参数解析 + Context Helpers） |
+| `middleware` | HTTP 中间件（CORS、RequestID、JWT、角色鉴权、Header Secret） |
 | `ratelimit` | 多维限流（RPM/TPM/并发，Redis Lua 脚本） |
 
 ## 使用示例

@@ -14,6 +14,7 @@ type Limiter struct {
 	rdb *redis.Client
 }
 
+// NewLimiter creates a rate limiter backed by the given Redis client.
 func NewLimiter(rdb *redis.Client) *Limiter {
 	return &Limiter{rdb: rdb}
 }

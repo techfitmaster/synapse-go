@@ -4,8 +4,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -222,5 +225,113 @@ func TestRequestIDMiddleware_PreservesProvided(t *testing.T) {
 
 	if c.GetString("trace_id") != "my-custom-id" {
 		t.Errorf("trace_id = %q, want %q", c.GetString("trace_id"), "my-custom-id")
+	}
+}
+
+// ── Miniredis unit tests (no external Redis required) ───────────
+
+func newMiniredis(t *testing.T) *redis.Client {
+	t.Helper()
+	s, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("miniredis: %v", err)
+	}
+	t.Cleanup(s.Close)
+	rdb := redis.NewClient(&redis.Options{Addr: s.Addr()})
+	t.Cleanup(func() { rdb.Close() })
+	return rdb
+}
+
+func TestLoginRateLimit_BlocksAfterMax(t *testing.T) {
+	rdb := newMiniredis(t)
+	handler := LoginRateLimit(rdb, 3, 15*time.Minute)
+
+	r := gin.New()
+	r.POST("/login", handler, func(c *gin.Context) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "bad creds"})
+	})
+
+	// 3 failed login attempts
+	for i := 0; i < 3; i++ {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/login", nil)
+		req.RemoteAddr = "10.0.0.1:1234"
+		r.ServeHTTP(w, req)
+	}
+
+	// 4th should be blocked
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/login", nil)
+	req.RemoteAddr = "10.0.0.1:1234"
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusTooManyRequests {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusTooManyRequests)
+	}
+}
+
+func TestLoginRateLimit_ClearsOnSuccess(t *testing.T) {
+	rdb := newMiniredis(t)
+	handler := LoginRateLimit(rdb, 5, 15*time.Minute)
+
+	// 2 failed logins
+	rFail := gin.New()
+	rFail.POST("/login", handler, func(c *gin.Context) {
+		c.JSON(http.StatusUnauthorized, gin.H{})
+	})
+	for i := 0; i < 2; i++ {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/login", nil)
+		req.RemoteAddr = "10.0.0.2:1234"
+		rFail.ServeHTTP(w, req)
+	}
+
+	// Successful login clears counter
+	rOK := gin.New()
+	rOK.POST("/login", handler, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{})
+	})
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("POST", "/login", nil)
+	req.RemoteAddr = "10.0.0.2:1234"
+	rOK.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
+	}
+
+	// Counter should be cleared — next failed attempts start from 0
+	count, _ := rdb.Get(rdb.Context(), "login_fail:10.0.0.2").Int64()
+	if count != 0 {
+		t.Errorf("counter = %d after success, want 0", count)
+	}
+}
+
+func TestIPRateLimit_BlocksOverLimit(t *testing.T) {
+	rdb := newMiniredis(t)
+	rpm := 3
+	handler := IPRateLimit(rdb, rpm)
+
+	r := gin.New()
+	r.GET("/api", handler, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{})
+	})
+
+	// Exhaust limit
+	for i := 0; i < rpm; i++ {
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("GET", "/api", nil)
+		req.RemoteAddr = "10.0.0.3:1234"
+		r.ServeHTTP(w, req)
+	}
+
+	// Next should be blocked
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/api", nil)
+	req.RemoteAddr = "10.0.0.3:1234"
+	r.ServeHTTP(w, req)
+
+	if w.Code != http.StatusTooManyRequests {
+		t.Errorf("status = %d, want %d", w.Code, http.StatusTooManyRequests)
 	}
 }

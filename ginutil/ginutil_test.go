@@ -120,3 +120,60 @@ func TestParseIDParam_Negative(t *testing.T) {
 	req := httptest.NewRequest("GET", "/items/-1", nil)
 	r.ServeHTTP(w, req)
 }
+
+// ── GetUserID Tests ─────────────────────────────────────────────
+
+func TestGetUserID_Set(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("user_id", uint64(123))
+
+	got := GetUserID(c)
+	if got != 123 {
+		t.Errorf("GetUserID() = %d, want 123", got)
+	}
+}
+
+func TestGetUserID_NotSet(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	got := GetUserID(c)
+	if got != 0 {
+		t.Errorf("GetUserID() = %d, want 0", got)
+	}
+}
+
+func TestGetUserID_WrongType(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("user_id", "not-a-uint64")
+
+	got := GetUserID(c)
+	if got != 0 {
+		t.Errorf("GetUserID() = %d, want 0", got)
+	}
+}
+
+// ── GetRole Tests ───────────────────────────────────────────────
+
+func TestGetRole_Set(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("role", "admin")
+
+	got := GetRole(c)
+	if got != "admin" {
+		t.Errorf("GetRole() = %q, want %q", got, "admin")
+	}
+}
+
+func TestGetRole_NotSet(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	got := GetRole(c)
+	if got != "" {
+		t.Errorf("GetRole() = %q, want empty", got)
+	}
+}

@@ -23,3 +23,17 @@ func ParseParam(c *gin.Context, name string) (int64, bool) {
 	}
 	return id, true
 }
+
+// GetUserID reads "user_id" (uint64) from the gin context.
+func GetUserID(c *gin.Context) uint64 {
+	v, _ := c.Get("user_id")
+	if id, ok := v.(uint64); ok {
+		return id
+	}
+	return 0
+}
+
+// GetRole reads "role" (string) from the gin context.
+func GetRole(c *gin.Context) string {
+	return c.GetString("role")
+}

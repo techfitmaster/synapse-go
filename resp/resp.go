@@ -20,6 +20,7 @@ const (
 	CodeForbidden    = 2003
 )
 
+// Response is the unified API response envelope returned by all endpoints.
 type Response struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
@@ -27,6 +28,7 @@ type Response struct {
 	TraceID string      `json:"trace_id,omitempty"`
 }
 
+// PageData wraps a paginated list response with total count and pagination info.
 type PageData struct {
 	List     interface{} `json:"list"`
 	Total    int64       `json:"total"`
@@ -34,6 +36,7 @@ type PageData struct {
 	PageSize int         `json:"page_size"`
 }
 
+// Success responds with HTTP 200 and the given data.
 func Success(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, Response{
 		Code:    CodeSuccess,
@@ -43,6 +46,7 @@ func Success(c *gin.Context, data interface{}) {
 	})
 }
 
+// SuccessPage responds with HTTP 200 and a paginated list.
 func SuccessPage(c *gin.Context, list interface{}, total int64, page, pageSize int) {
 	c.JSON(http.StatusOK, Response{
 		Code:    CodeSuccess,
@@ -57,6 +61,7 @@ func SuccessPage(c *gin.Context, list interface{}, total int64, page, pageSize i
 	})
 }
 
+// Error responds with the given HTTP status and business error code.
 func Error(c *gin.Context, httpStatus int, code int, message string) {
 	c.JSON(httpStatus, Response{
 		Code:    code,
@@ -66,6 +71,7 @@ func Error(c *gin.Context, httpStatus int, code int, message string) {
 	})
 }
 
+// InternalError logs the error and responds with HTTP 500.
 func InternalError(c *gin.Context, err error) {
 	logger.Error("request error",
 		logger.String("method", c.Request.Method),
@@ -81,6 +87,7 @@ func InternalError(c *gin.Context, err error) {
 	})
 }
 
+// Created responds with HTTP 201 and the given data.
 func Created(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusCreated, Response{
 		Code:    CodeSuccess,
@@ -90,11 +97,13 @@ func Created(c *gin.Context, data interface{}) {
 	})
 }
 
+// PageParams holds parsed pagination query parameters.
 type PageParams struct {
 	Page     int
 	PageSize int
 }
 
+// ParsePageParams extracts page and page_size from query string with defaults (page=1, page_size=20, max=100).
 func ParsePageParams(c *gin.Context) PageParams {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))

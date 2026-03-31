@@ -22,8 +22,9 @@ redis/        → Redis 连接
 logger/       → 结构化日志（zap）
 migrate/      → 数据库迁移
 resp/         → 统一 API 响应格式 + 错误码
-ginutil/      → Gin 参数解析工具
-middleware/   → HTTP 中间件（CORS、RequestID、JWT Auth）
+bizerr/       → 业务错误类型 + Handler 映射
+ginutil/      → Gin 工具（参数解析 + Context Helpers）
+middleware/   → HTTP 中间件（CORS、RequestID、JWT、角色鉴权、Header Secret）
 ratelimit/    → 多维限流（Redis Lua）
 mailer/       → 邮件发送
 timeutil/     → 时间工具
