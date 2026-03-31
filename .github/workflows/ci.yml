@@ -1,0 +1,56 @@
+# synapse-go CI
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: '1.24'
+  COVERAGE_THRESHOLD: 50  # 含集成测试包（-short 跳过），实际可达 ~56%；目标 70% 需 CI services
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+      - name: Test
+        run: go test ./... -race -coverprofile=coverage.out -short -count=1
+
+      - name: Coverage Check
+        run: |
+          if [ -f coverage.out ]; then
+            COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+            echo "📊 覆盖率: ${COVERAGE}%（最低要求: ${COVERAGE_THRESHOLD}%）"
+            TOTAL_INT=$(echo "$COVERAGE" | cut -d. -f1)
+            if [ "$TOTAL_INT" -lt "$COVERAGE_THRESHOLD" ]; then
+              echo "::error::覆盖率 ${COVERAGE}% 低于阈值 ${COVERAGE_THRESHOLD}%"
+              exit 1
+            fi
+            echo "✅ 覆盖率达标"
+          fi
+
+      - name: Build
+        run: go build ./...
