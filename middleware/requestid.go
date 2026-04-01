@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// RequestIDMiddleware extracts or generates an X-Request-ID header and sets it as trace_id in context.
 func RequestIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		traceID := c.GetHeader("X-Request-ID")

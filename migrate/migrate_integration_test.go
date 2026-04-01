@@ -59,7 +59,7 @@ func TestRun_WithMigration(t *testing.T) {
 		m, err := migrate.New("file://"+dir, dbURL)
 		if err == nil {
 			_ = m.Down()
-			m.Close()
+			_, _ = m.Close()
 		}
 	})
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/techfitmaster/synapse-go/config"
 )
 
+// New initializes a MySQL connection pool via GORM with the given config.
 func New(cfg config.MySQLConfig) (*gorm.DB, error) {
 	db, err := gorm.Open(mysql.Open(cfg.DSN), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),

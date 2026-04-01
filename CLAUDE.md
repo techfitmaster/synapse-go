@@ -22,9 +22,25 @@ redis/        → Redis 连接
 logger/       → 结构化日志（zap）
 migrate/      → 数据库迁移
 resp/         → 统一 API 响应格式 + 错误码
-ginutil/      → Gin 参数解析工具
-middleware/   → HTTP 中间件（CORS、RequestID、JWT Auth）
+bizerr/       → 业务错误类型 + Handler 映射
+ginutil/      → Gin 工具（参数解析 + Context Helpers）
+middleware/   → HTTP 中间件（CORS、RequestID、JWT、角色鉴权、Header Secret）
 ratelimit/    → 多维限流（Redis Lua）
+crypto/       → 密码哈希（bcrypt）+ 验证码生成
+lock/         → Redis 分布式锁（token 所有权 + Lua 原子释放）
+audit/        → 审计日志（Gin 中间件自动 + 事务内手动）
+idempotent/   → 幂等控制（中间件 + Service 层）
+sequence/     → Redis 序列号生成
+notify/       → 通知抽象层（邮件/Webhook + 重试）
+validate/     → 通用校验（邮箱/手机号）
+healthcheck/  → 健康检查（多检查项 + Gin Handler）
+scheduler/    → 定时任务调度
+storage/      → 对象存储抽象
+circuitbreaker/ → 熔断器状态机
+tenant/       → 多租户上下文
+event/        → 轻量事件总线
+cache/        → 缓存抽象（Redis + GetOrLoad）
+graceful/     → HTTP Server 优雅关停
 mailer/       → 邮件发送
 timeutil/     → 时间工具
 ```

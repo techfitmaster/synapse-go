@@ -24,6 +24,7 @@ type SMTPMailer struct {
 	from string
 }
 
+// New creates a Mailer. Returns NoopMailer if host is empty, SMTPMailer otherwise.
 func New(host, port, user, pass, from string) Mailer {
 	if host == "" {
 		return &NoopMailer{}

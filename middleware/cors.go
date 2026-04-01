@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CORSMiddleware allows requests from the given comma-separated origins and handles preflight.
 func CORSMiddleware(origins string) gin.HandlerFunc {
 	allowed := strings.Split(origins, ",")
 	allowedSet := make(map[string]bool, len(allowed))

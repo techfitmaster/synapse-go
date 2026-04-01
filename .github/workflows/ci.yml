@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GO_VERSION: '1.24'
+  GO_VERSION: '1.25'
   COVERAGE_THRESHOLD: 50  # 含集成测试包（-short 跳过），实际可达 ~56%；目标 70% 需 CI services
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -31,10 +31,17 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Reject local replace directives
+        run: |
+          if grep -q 'replace.*=>.*/' go.mod; then
+            echo "::error::go.mod contains local replace directive"
+            exit 1
+          fi
+
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: v2.11.4
 
       - name: Test
         run: go test ./... -race -coverprofile=coverage.out -short -count=1

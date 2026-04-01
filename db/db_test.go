@@ -22,7 +22,7 @@ func TestNew_Success(t *testing.T) {
 	if err := sqlDB.Ping(); err != nil {
 		t.Fatalf("ping failed: %v", err)
 	}
-	sqlDB.Close()
+	_ = sqlDB.Close()
 }
 
 // TC-HAPPY-DB-002: connection pool settings applied
@@ -33,7 +33,7 @@ func TestNew_PoolSettings(t *testing.T) {
 		t.Fatalf("failed to connect: %v", err)
 	}
 	sqlDB, _ := db.DB()
-	defer sqlDB.Close()
+	defer func() { _ = sqlDB.Close() }()
 
 	if sqlDB.Stats().MaxOpenConnections != 100 {
 		t.Errorf("MaxOpenConnections = %d, want 100", sqlDB.Stats().MaxOpenConnections)

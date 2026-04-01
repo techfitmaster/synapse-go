@@ -9,6 +9,7 @@ import (
 	"github.com/techfitmaster/synapse-go/config"
 )
 
+// New initializes a Redis client and verifies connectivity with a ping.
 func New(cfg config.RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,

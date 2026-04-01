@@ -120,3 +120,90 @@ func TestParseIDParam_Negative(t *testing.T) {
 	req := httptest.NewRequest("GET", "/items/-1", nil)
 	r.ServeHTTP(w, req)
 }
+
+// ── GetUserID Tests ─────────────────────────────────────────────
+
+func TestGetUserID_Set(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("user_id", uint64(123))
+
+	got := GetUserID(c)
+	if got != 123 {
+		t.Errorf("GetUserID() = %d, want 123", got)
+	}
+}
+
+func TestGetUserID_NotSet(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	got := GetUserID(c)
+	if got != 0 {
+		t.Errorf("GetUserID() = %d, want 0", got)
+	}
+}
+
+func TestGetUserID_WrongType(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("user_id", "not-a-uint64")
+
+	got := GetUserID(c)
+	if got != 0 {
+		t.Errorf("GetUserID() = %d, want 0", got)
+	}
+}
+
+func TestGetUserID_TypeSwitch(t *testing.T) {
+	tests := []struct {
+		name  string
+		value interface{}
+		want  uint64
+	}{
+		{"uint64", uint64(123), 123},
+		{"int64", int64(42), 42},
+		{"int", int(99), 99},
+		{"float64", float64(55), 55},
+		{"negative_int64", int64(-1), 0},
+		{"negative_float64", float64(-1), 0},
+		{"string", "not-a-number", 0},
+		{"nil", nil, 0},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := httptest.NewRecorder()
+			c, _ := gin.CreateTestContext(w)
+			if tt.value != nil {
+				c.Set("user_id", tt.value)
+			}
+			got := GetUserID(c)
+			if got != tt.want {
+				t.Errorf("GetUserID() = %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
+// ── GetRole Tests ───────────────────────────────────────────────
+
+func TestGetRole_Set(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Set("role", "admin")
+
+	got := GetRole(c)
+	if got != "admin" {
+		t.Errorf("GetRole() = %q, want %q", got, "admin")
+	}
+}
+
+func TestGetRole_NotSet(t *testing.T) {
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	got := GetRole(c)
+	if got != "" {
+		t.Errorf("GetRole() = %q, want empty", got)
+	}
+}
