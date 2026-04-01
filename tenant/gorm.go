@@ -27,7 +27,7 @@ func RegisterCallbacks(db *gorm.DB, column string) {
 		}
 		tenantID := FromContext(db.Statement.Context)
 		if tenantID == "" {
-			db.AddError(ErrMissingTenantID)
+			_ = db.AddError(ErrMissingTenantID)
 			return
 		}
 		db.Statement.AddClause(clause.Where{
@@ -43,7 +43,7 @@ func RegisterCallbacks(db *gorm.DB, column string) {
 		}
 		tenantID := FromContext(db.Statement.Context)
 		if tenantID == "" {
-			db.AddError(ErrMissingTenantID)
+			_ = db.AddError(ErrMissingTenantID)
 			return
 		}
 		db.Statement.SetColumn(column, tenantID)
